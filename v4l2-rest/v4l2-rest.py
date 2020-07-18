@@ -86,21 +86,25 @@ while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
     print(json.dumps(pixfmt, cls=CDataJSONEncoder))
     formats[pixfmtn] = {}
     formats[pixfmtn]["description"] = pixfmt.description
-    formats[pixfmtn]["framesizes"] = {}
     frmsizes = {}
     frmsizen = 0
     while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
         print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
         print(json.dumps(frmsize, cls=CDataJSONEncoder))
-        formats[pixfmtn]["framesizes"][frmsizen] = {}
-        formats[pixfmtn]["framesizes"][frmsizen]["height"] = frmsize.discrete.height
-        formats[pixfmtn]["framesizes"][frmsizen]["width"] = frmsize.discrete.width
+        frmsizes[frmsizen] = {}
+        frmsizes[frmsizen]["height"] = frmsize.discrete.height
+        frmsizes[frmsizen]["width"] = frmsize.discrete.width
+        frmivals = {}
         frmivaln = 0
         while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
             print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
             print(json.dumps(frmival, cls=CDataJSONEncoder))
-
+            # frmivals[frmivaln] = {}
+            # frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
+            # frmivals[frmivaln]["denominator"] = frmival.discrete.denomintaotr
+            # frmsizes[frmsizen]["intervals"] = frmivals
             frmivaln = frmivaln + 1
+        formats[pixfmtn]["framesizes"] = frmsizes
         frmsizen = frmsizen + 1
     pixfmtn = pixfmtn + 1
 
