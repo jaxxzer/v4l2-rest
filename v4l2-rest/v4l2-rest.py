@@ -3,9 +3,16 @@ import fcntl
 import json
 from ctypes_json import CDataJSONEncoder
 
+from bottle import route, run
+
 # list cameras
 def list_devices():
   return None
+
+def get_camera_settings(device):
+  return None
+
+
 # get camera pixelformats
 def get_camera_pixelformats(device, index):
   vd = open(device)
@@ -34,8 +41,6 @@ def get_camera_framesize(device, fmtdesc, index):
     vd.close()
     return res
 
-
-
 # get camera framerates
 def get_camera_frameinterval(device, frmsizeenum, index):
     vd = open(device)
@@ -53,9 +58,8 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     vd.close()
     return res
 
-device = '/dev/video2'
+# device = '/dev/video2'
 
-formats = {}
 
 # ```
 # 0: {
@@ -79,34 +83,40 @@ formats = {}
 #     ]
 # }
 # ```
-pixfmtn = 0
-thislist = []
-while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
-    print("pixfmt: %s" % str(pixfmt.description))
-    #print(json.dumps(pixfmt, cls=CDataJSONEncoder))
-    formats[pixfmtn] = {}
-    formats[pixfmtn]["description"] = pixfmt.description.decode('utf-8')
-    frmsizes = {}
-    frmsizen = 0
-    while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
-        print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
-        #print(json.dumps(frmsize, cls=CDataJSONEncoder))
-        frmsizes[frmsizen] = {}
-        frmsizes[frmsizen]["height"] = frmsize.discrete.height
-        frmsizes[frmsizen]["width"] = frmsize.discrete.width
-        frmivals = {}
-        frmivaln = 0
-        while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
-            print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
-            #print(json.dumps(frmival, cls=CDataJSONEncoder))
-            frmivals[frmivaln] = {}
-            frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
-            frmivals[frmivaln]["denominator"] = frmival.discrete.denominator
-            frmivaln = frmivaln + 1
-        frmsizes[frmsizen]["intervals"] = frmivals
-        frmsizen = frmsizen + 1
-    formats[pixfmtn]["framesizes"] = frmsizes
-    pixfmtn = pixfmtn + 1
+@route("/camera/settings/<device>")
+def get_camera_formats(device):
+  device = "/dev/video" + device
+  formats = {}
+  pixfmtn = 0
+  while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
+      print("pixfmt: %s" % str(pixfmt.description))
+      #print(json.dumps(pixfmt, cls=CDataJSONEncoder))
+      formats[pixfmtn] = {}
+      formats[pixfmtn]["description"] = pixfmt.description.decode('utf-8')
+      frmsizes = {}
+      frmsizen = 0
+      while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
+          print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
+          #print(json.dumps(frmsize, cls=CDataJSONEncoder))
+          frmsizes[frmsizen] = {}
+          frmsizes[frmsizen]["height"] = frmsize.discrete.height
+          frmsizes[frmsizen]["width"] = frmsize.discrete.width
+          frmivals = {}
+          frmivaln = 0
+          while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
+              print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
+              #print(json.dumps(frmival, cls=CDataJSONEncoder))
+              frmivals[frmivaln] = {}
+              frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
+              frmivals[frmivaln]["denominator"] = frmival.discrete.denominator
+              frmivaln = frmivaln + 1
+          frmsizes[frmsizen]["intervals"] = frmivals
+          frmsizen = frmsizen + 1
+      formats[pixfmtn]["framesizes"] = frmsizes
+      pixfmtn = pixfmtn + 1
+  return json.dumps(formats, indent=4)
 
 #print(formats)
-print(json.dumps(formats, indent=2))
+#print(json.dumps(formats, indent=2))
+
+run(host="localhost", port=8888)
