@@ -42,7 +42,7 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     res.pixel_format = frmsizeenum.pixel_format
     res.height = frmsizeenum.discrete.height
     res.width = frmsizeenum.discrete.width
-    res.index = 0
+    res.index = index
     try:
       fcntl.ioctl(vd, v4l2.VIDIOC_ENUM_FRAMEINTERVALS, res)
     except:
@@ -55,12 +55,14 @@ def get_camera_frameinterval(device, frmsizeenum, index):
 device = '/dev/video0'
 
 pixfmtn = 0
-frmsizen = 0
-frmival = 0
-
-pixfmt = get_camera_pixelformats(device, 0)
-print("pixfmt: %s" % pixfmt.description)
-frmsize = get_camera_framesize(device, pixfmt, 0)
-print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
-frmival = get_camera_frameinterval(device, frmsize, 0)
-print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
+while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
+    print("pixfmt: %s" % str(pixfmt.description))
+    frmsizen = 0
+    while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
+        print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
+        frmivaln = 0
+        while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
+            print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
+            frmivaln = frmivaln + 1
+        frmsizen = frmsizen + 1
+    pixfmtn = pixfmtn + 1
