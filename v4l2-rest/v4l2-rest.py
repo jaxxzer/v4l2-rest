@@ -53,7 +53,7 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     vd.close()
     return res
 
-device = '/dev/video0'
+device = '/dev/video2'
 
 formats = {}
 
@@ -83,14 +83,14 @@ pixfmtn = 0
 thislist = []
 while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
     print("pixfmt: %s" % str(pixfmt.description))
-    print(json.dumps(pixfmt, cls=CDataJSONEncoder))
+    #print(json.dumps(pixfmt, cls=CDataJSONEncoder))
     formats[pixfmtn] = {}
-    formats[pixfmtn]["description"] = pixfmt.description
+    formats[pixfmtn]["description"] = pixfmt.description.decode('utf-8')
     frmsizes = {}
     frmsizen = 0
     while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
         print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
-        print(json.dumps(frmsize, cls=CDataJSONEncoder))
+        #print(json.dumps(frmsize, cls=CDataJSONEncoder))
         frmsizes[frmsizen] = {}
         frmsizes[frmsizen]["height"] = frmsize.discrete.height
         frmsizes[frmsizen]["width"] = frmsize.discrete.width
@@ -98,14 +98,15 @@ while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
         frmivaln = 0
         while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
             print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
-            print(json.dumps(frmival, cls=CDataJSONEncoder))
-            # frmivals[frmivaln] = {}
-            # frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
-            # frmivals[frmivaln]["denominator"] = frmival.discrete.denomintaotr
-            # frmsizes[frmsizen]["intervals"] = frmivals
+            #print(json.dumps(frmival, cls=CDataJSONEncoder))
+            frmivals[frmivaln] = {}
+            frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
+            frmivals[frmivaln]["denominator"] = frmival.discrete.denominator
             frmivaln = frmivaln + 1
-        formats[pixfmtn]["framesizes"] = frmsizes
+        frmsizes[frmsizen]["intervals"] = frmivals
         frmsizen = frmsizen + 1
+    formats[pixfmtn]["framesizes"] = frmsizes
     pixfmtn = pixfmtn + 1
 
-print(formats)
+#print(formats)
+print(json.dumps(formats, indent=2))
