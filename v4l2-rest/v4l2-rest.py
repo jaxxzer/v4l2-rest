@@ -47,11 +47,11 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     res = v4l2.v4l2_frmivalenum()
     res.pixel_format = frmsizeenum.pixel_format
     if frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE:
-      res.height = frmsize.discrete.height
-      res.width = frmsize.discrete.width
+      res.height = frmsizeenum.discrete.height
+      res.width = frmsizeenum.discrete.width
     elif frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
-      res.height = frmsize.stepwise.max_height
-      res.width = frmsize.stepwise.max_width
+      res.height = frmsizeenum.stepwise.max_height
+      res.width = frmsizeenum.stepwise.max_width
     res.index = index
     try:
       fcntl.ioctl(vd, v4l2.VIDIOC_ENUM_FRAMEINTERVALS, res)
