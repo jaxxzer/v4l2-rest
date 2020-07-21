@@ -88,14 +88,16 @@ def get_camera_formats(device):
   device = "/dev/video" + device
   formats = {}
   pixfmtn = 0
-  while (pixfmt := get_camera_pixelformats(device, pixfmtn)) is not None:
+  pixfmt = get_camera_pixelformats(device, pixfmtn)
+  while pixfmt is not None:
       print("pixfmt: %s" % str(pixfmt.description))
       #print(json.dumps(pixfmt, cls=CDataJSONEncoder))
       formats[pixfmtn] = {}
       formats[pixfmtn]["description"] = pixfmt.description.decode('utf-8')
       frmsizes = {}
       frmsizen = 0
-      while (frmsize := get_camera_framesize(device, pixfmt, frmsizen)) is not None:
+      frmsize = get_camera_framesize(device, pixfmt, frmsizen)
+      while frmsize is not None:
           if frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE:
             print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
           elif frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
@@ -106,7 +108,8 @@ def get_camera_formats(device):
           frmsizes[frmsizen]["width"] = frmsize.discrete.width
           frmivals = {}
           frmivaln = 0
-          while (frmival := get_camera_frameinterval(device, frmsize, frmivaln)) is not None:
+          frmival = get_camera_frameinterval(device, frmsize, frmivaln)
+          while frmival is not None:
             if frmival.type == v4l2.V4L2_FRMIVAL_TYPE_DISCRETE:
               print("ival: %d/%d" % (frmival.discrete.numerator, frmival.discrete.denominator))
             elif frmsize.type == v4l2.V4L2_FRMIVAL_TYPE_STEPWISE:
@@ -116,10 +119,14 @@ def get_camera_formats(device):
             frmivals[frmivaln]["numerator"] = frmival.discrete.numerator
             frmivals[frmivaln]["denominator"] = frmival.discrete.denominator
             frmivaln = frmivaln + 1
+            frmival = get_camera_frameinterval(device, frmsize, frmivaln)
           frmsizes[frmsizen]["intervals"] = frmivals
           frmsizen = frmsizen + 1
+          frmsize = get_camera_framesize(device, pixfmt, frmsizen)
       formats[pixfmtn]["framesizes"] = frmsizes
       pixfmtn = pixfmtn + 1
+      pixfmt = get_camera_pixelformats(device, pixfmtn)
+
   return json.dumps(formats, indent=4)
 
 #print(formats)
