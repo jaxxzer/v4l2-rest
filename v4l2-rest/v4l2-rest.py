@@ -46,10 +46,10 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     vd = open(device)
     res = v4l2.v4l2_frmivalenum()
     res.pixel_format = frmsizeenum.pixel_format
-    if frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE:
+    if frmsizeenum.type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE:
       res.height = frmsizeenum.discrete.height
       res.width = frmsizeenum.discrete.width
-    elif frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
+    elif frmsizeenum.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
       res.height = frmsizeenum.stepwise.max_height
       res.width = frmsizeenum.stepwise.max_width
     res.index = index
