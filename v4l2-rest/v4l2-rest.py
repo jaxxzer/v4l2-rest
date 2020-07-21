@@ -17,10 +17,12 @@ def get_camera_settings(device):
 def get_camera_pixelformats(device, index):
   vd = open(device)
   res = v4l2.v4l2_fmtdesc()
-  res.type = v4l2.V4L2_BUF_TYPE_VIDEO_CAPTURE
+  res.type = 9
   res.index = index
   try:
+    print(res.type)
     fcntl.ioctl(vd, v4l2.VIDIOC_ENUM_FMT, res)
+    print('got it')
   except:
     res = None
   vd.close()
@@ -52,10 +54,13 @@ def get_camera_frameinterval(device, frmsizeenum, index):
     elif frmsizeenum.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
       res.height = frmsizeenum.stepwise.max_height
       res.width = frmsizeenum.stepwise.max_width
+      print("checking stepwise", res.height, res.width)
     res.index = index
     try:
       fcntl.ioctl(vd, v4l2.VIDIOC_ENUM_FRAMEINTERVALS, res)
-    except:
+      print("ival res", res.type)
+    except Exception as e:
+      print(e)
       res = None
     # if res.type == v4l2.V4L2_FRMIVAL_TYPE_DISCRETE:
     #     print("ival: %d/%d" % (res.discrete.numerator, res.discrete.denominator))
@@ -93,6 +98,7 @@ def get_camera_formats(device):
   formats = {}
   pixfmtn = 0
   pixfmt = get_camera_pixelformats(device, pixfmtn)
+  print("pixfmtn", pixfmtn, pixfmt)
   while pixfmt is not None:
       print("pixfmt: %s" % str(pixfmt.description))
       #print(json.dumps(pixfmt, cls=CDataJSONEncoder))
@@ -139,4 +145,8 @@ def get_camera_formats(device):
 #print(formats)
 #print(json.dumps(formats, indent=2))
 
-run(host="localhost", port=8888)
+#run(host="localhost", port=8888)
+get_camera_formats("0")
+get_camera_formats("10")
+get_camera_formats("11")
+get_camera_formats("12")
