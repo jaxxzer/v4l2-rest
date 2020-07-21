@@ -98,14 +98,17 @@ def get_camera_formats(device):
       frmsizen = 0
       frmsize = get_camera_framesize(device, pixfmt, frmsizen)
       while frmsize is not None:
+          frmsizes[frmsizen] = {}
           if frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_DISCRETE:
             print("frmsize: %d x %d" % (frmsize.discrete.height, frmsize.discrete.width))
+            frmsizes[frmsizen]["height"] = frmsize.discrete.height
+            frmsizes[frmsizen]["width"] = frmsize.discrete.width
           elif frmsize.type == v4l2.V4L2_FRMSIZE_TYPE_STEPWISE:
             print("frmsize: %d x %d -> %d x %d" % (frmsize.stepwise.min_width, frmsize.stepwise.min_height, frmsize.stepwise.max_width, frmsize.stepwise.max_height))
+            frmsizes[frmsizen]["height"] = frmsize.stepwise.max_height
+            frmsizes[frmsizen]["width"] = frmsize.stepwise.max_width
           #print(json.dumps(frmsize, cls=CDataJSONEncoder))
-          frmsizes[frmsizen] = {}
-          frmsizes[frmsizen]["height"] = frmsize.discrete.height
-          frmsizes[frmsizen]["width"] = frmsize.discrete.width
+
           frmivals = {}
           frmivaln = 0
           frmival = get_camera_frameinterval(device, frmsize, frmivaln)
